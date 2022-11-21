@@ -33,13 +33,28 @@ bgImage.src = './images/Pellet-Town.png';
 const foregroundImage = new Image();
 foregroundImage.src = './images/Foreground-Objects.png';
 
-const playerImage = new Image();
-playerImage.src = './images/playerDown.png';
+const playerDownImage = new Image();
+playerDownImage.src = './images/playerDown.png';
+
+const playerUpImage = new Image();
+playerUpImage.src = './images/playerUp.png';
+
+const playerLeftImage = new Image();
+playerLeftImage.src = './images/playerLeft.png';
+
+const playerRightImage = new Image();
+playerRightImage.src = './images/playerRight.png';
 
 const player = new Sprite({
 	position: { x: canvas.width / 2 - 192 / 8, y: canvas.height / 2 - 68 / 4 },
-	image: playerImage,
+	image: playerDownImage,
 	frames: { max: 4 },
+	sprites: {
+		up: playerUpImage,
+		down: playerDownImage,
+		left: playerLeftImage,
+		right: playerRightImage,
+	},
 });
 
 const backGround = new Sprite({ position: { x: offset.x, y: offset.y }, image: bgImage });
@@ -83,7 +98,12 @@ function animate() {
 	foreground.draw();
 
 	let canMove = true;
+	player.isMoving = false;
+
 	if (keys.w.pressed && lastKeyPressed === 'w') {
+		player.isMoving = true;
+		player.image = player.sprites.up;
+
 		for (let i = 0; i < boundaries.length; i++) {
 			const boundary = boundaries[i];
 			if (
@@ -105,6 +125,9 @@ function animate() {
 
 		canMove && movables.forEach((movable) => (movable.position.y += 3));
 	} else if (keys.a.pressed && lastKeyPressed === 'a') {
+		player.isMoving = true;
+		player.image = player.sprites.left;
+
 		for (let i = 0; i < boundaries.length; i++) {
 			const boundary = boundaries[i];
 			if (
@@ -126,6 +149,9 @@ function animate() {
 
 		canMove && movables.forEach((movable) => (movable.position.x += 3));
 	} else if (keys.s.pressed && lastKeyPressed === 's') {
+		player.isMoving = true;
+		player.image = player.sprites.down;
+
 		for (let i = 0; i < boundaries.length; i++) {
 			const boundary = boundaries[i];
 			if (
@@ -148,6 +174,9 @@ function animate() {
 		canMove && movables.forEach((movable) => (movable.position.y -= 3));
 	} else if (keys.d.pressed && lastKeyPressed === 'd') {
 		for (let i = 0; i < boundaries.length; i++) {
+			player.isMoving = true;
+      player.image = player.sprites.right;
+
 			const boundary = boundaries[i];
 			if (
 				detectCollisions({
