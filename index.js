@@ -2,7 +2,7 @@ const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 
 canvas.width = 1024;
-canvas.height = 576;
+canvas.height = 540;
 
 const collisionsMap = [];
 for (let i = 0; i < collisions.length; i += 70) {
@@ -19,7 +19,7 @@ const battleZones = [];
 
 const offset = {
 	x: -740,
-	y: -600,
+	y: -630,
 };
 
 collisionsMap.forEach((row, row_index) => {
@@ -106,14 +106,23 @@ function detectCollisions({ rectangle1, rectangle2 }) {
 	);
 }
 
+const battle = {
+	initiated: false,
+};
+
 function animate() {
-	window.requestAnimationFrame(animate);
+	const animationId = window.requestAnimationFrame(animate);
 
 	backGround.draw();
 	boundaries.forEach((boundary) => boundary.draw());
 	battleZones.forEach((battleZone) => battleZone.draw());
 	player.draw();
 	foreground.draw();
+
+	let canMove = true;
+	player.isMoving = false;
+
+	if (battle.initiated) return;
 
 	if (keys.w.pressed || keys.a.pressed || keys.s.pressed || keys.d.pressed) {
 		for (let i = 0; i < battleZones.length; i++) {
@@ -127,16 +136,30 @@ function animate() {
 			if (
 				detectCollisions({ rectangle1: player, rectangle2: battleZone }) &&
 				overlappingArea > (player.width * player.height) / 2 &&
-				Math.random() < 0.03
+				Math.random() < 0.04
 			) {
-				console.log('Start Fight');
+				window.cancelAnimationFrame(animationId);
+				battle.initiated = true;
+
+				gsap.to('#cover', {
+					opacity: 1,
+					repeat: 3,
+					yoyo: true,
+					duration: 0.4,
+					onComplete() {
+						gsap.to('#cover', {
+							opacity: 1,
+							duration: 0.4,
+						});
+
+						animateBattle();
+					},
+				});
+
 				break;
 			}
 		}
 	}
-
-	let canMove = true;
-	player.isMoving = false;
 
 	if (keys.w.pressed && lastKeyPressed === 'w') {
 		player.isMoving = true;
@@ -237,6 +260,11 @@ function animate() {
 	}
 }
 animate();
+
+function animateBattle() {
+	window.requestAnimationFrame(animateBattle);
+	console.log('Battle Animate');
+}
 
 let lastKeyPressed = '';
 window.addEventListener('keydown', (e) => {
